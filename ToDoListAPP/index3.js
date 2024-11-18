@@ -1,7 +1,7 @@
 let url = "https://dummyjson.com/todos" ; 
 let todoList = [] ; 
 
-let count = 0 ;
+let count = -1 ;
 
 
 async function fetchData(){
@@ -11,6 +11,7 @@ async function fetchData(){
         todoList.push(todo) ; 
         
     });
+    localStorage.setItem("tasks", JSON.stringify(todoList));
     console.log(todoList) ; 
     displayData(todoList) ; 
     count++;
@@ -41,11 +42,14 @@ function displayData(todoList){
         liElement.textContent = todoList[i].todo ; 
         liElement.appendChild(checkbox);
         liElement.appendChild(deletebtn);
+        deletebtn.classList.add("delete-btn");
         ul.appendChild(liElement) ; 
 
        deletebtn.addEventListener('click',() => {
         if(confirm("are you sure yhat you want to delete it ?")){
         liElement.remove() ; 
+        todoList.splice(i, 1); 
+        localStorage.setItem("tasks", JSON.stringify(todoList)); 
         count--;
         document.getElementById("counter-todo").textContent = count ; 
         }
@@ -64,6 +68,7 @@ function addData()
         let liElement = document.createElement("li");
         liElement.textContent = dataText;
         let deletebtn = document.createElement("button");
+        deletebtn.classList.add("delete-btn");
         deletebtn.textContent = "Delete";
         let checkbox = document.createElement("input") ;
         checkbox.type = "checkbox" ;
@@ -81,10 +86,14 @@ function addData()
         liElement.appendChild(checkbox)
         liElement.appendChild(deletebtn);
         ul.appendChild(liElement);
+        todoList.push({ todo: dataText, completed: false }); 
+        localStorage.setItem("tasks", JSON.stringify(todoList)); 
         dataText = document.getElementById("add-todo").value = "";
         deletebtn.addEventListener('click', () => {
             if (confirm("Are you sure that you want to delete it?")) {
                 liElement.remove();
+                todoList.splice(i, 1); 
+                localStorage.setItem("tasks", JSON.stringify(todoList)); 
                 count--;
                 document.getElementById("counter-todo").textContent = count ; 
             }
@@ -93,32 +102,28 @@ function addData()
 })
 } 
        
-// function searchData() {
-//     let searchText = document.getElementById("search-todo").value.toLowerCase();  // Get search input and convert to lowercase
-//     let ul = document.getElementById("todolist");
-//     let listItems = ul.getElementsByTagName("li");  // Get all list items
+function searchData() {
+    let searchText = document.getElementById("search-todo").value.toLowerCase();  // Get search input and convert to lowercase
+    let ul = document.getElementById("todolist");
+    let listItems = ul.getElementsByTagName("li");  
+    for (let i = 0; i < listItems.length; i++) {
+        let todoText = listItems[i].textContent.toLowerCase();
+        if (todoText.includes(searchText)) {
+            listItems[i].style.display = "";  
+        } else {
+            listItems[i].style.display = "none"; 
+        }
+    }
+}
 
-//     // Loop through all list items and hide those that don't match the search text
-//     for (let i = 0; i < listItems.length; i++) {
-//         let todoText = listItems[i].textContent.toLowerCase();
-//         if (todoText.includes(searchText)) {
-//             listItems[i].style.display = "";  // Show the item if it matches the search
-//         } else {
-//             listItems[i].style.display = "none";  // Hide the item if it doesn't match
-//         }
-//     }
-// }
-// Call the searchData function when the button is clicked
-// document.getElementById("search-button").addEventListener("click", searchData);
-// searchData();
+document.getElementById("search-button").addEventListener("click", searchData);
 
 
-// 
 
 document.addEventListener('DOMContentLoaded', () => { //chatgpt
     fetchData();  // Fetch initial data
     addData();    // Set up adding new todo
-    // 
+    searchData();
 });
 
 // let counter = document.getElementById("counter-todo").textContent = count ; 
